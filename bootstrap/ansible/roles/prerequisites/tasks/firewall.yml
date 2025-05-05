@@ -6,7 +6,7 @@
     port: 16443
     proto: tcp
 
-- name: Allow MicroK8s dqlite (19001/tcp, 19002/tcp)
+- name: Allow MicroK8s dqlite (19001/tcp, 19002/tcp, 19003/tcp)
   ufw:
     rule: allow
     port: "{{ item }}"
@@ -22,7 +22,16 @@
     port: 25000
     proto: tcp
 
-- name: Allow all traffic between cluster nodes (using private IPs)
+# Allow all traffic between cluster nodes using ONLY private IPs
+- name: First remove any existing rules for cluster communication
+  ufw:
+    rule: allow
+    delete: yes
+    from_ip: "{{ item }}"
+  loop: "{{ groups['all'] | map('extract', hostvars, ['ansible_host']) | list }}"
+  ignore_errors: yes
+
+- name: Allow all traffic between cluster nodes (using private IPs only)
   ufw:
     rule: allow
     from_ip: "{{ item }}"

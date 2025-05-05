@@ -5,5 +5,6 @@ ha_enabled: true
 metallb_enabled: false
 metallb_address_pool: "103.110.174.27-103.110.174.28"
 enable_addons:
-  - dns
-  - metrics-server
+  - metallb
+  # - dns
+  # - metrics-server
