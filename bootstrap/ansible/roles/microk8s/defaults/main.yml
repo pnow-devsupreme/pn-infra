@@ -1,6 +1,6 @@
 ---
 # Default variables for MicroK8s role
-microk8s_channel: "1.32"
+microk8s_channel: "1.32/stable"
 ha_enabled: true
 metallb_enabled: false
 metallb_address_pool: "103.110.174.27-103.110.174.28"

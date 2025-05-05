@@ -1,8 +1,35 @@
 ---
-- name: Get node token from primary master
-  command: microk8s add-node
+# Ensure the primary master is ready first
+- name: Ensure MicroK8s is running on primary master
+  command: microk8s status --wait-ready
+  changed_when: false
+  when: inventory_hostname == groups['masters'][0]
+  register: primary_status
+  until: primary_status.rc == 0
+  retries: 5
+  delay: 10
+
+# Use the private IP instead of getting it from the system
+- name: Set primary node IP for joining
+  set_fact:
+    master_ip: "{{ hostvars[groups['masters'][0]]['private_ip'] }}"
+  when: inventory_hostname == groups['masters'][0]
+
+- name: Display primary master IP
+  debug:
+    msg: "Primary master IP for joining: {{ master_ip }}"
+  when: inventory_hostname == groups['masters'][0]
+
+# Generate a fresh token for each joining node
+- name: Generate join token for secondary masters
+  command: microk8s add-node --token-ttl 3600
   register: add_node_output
   changed_when: false
+  when: inventory_hostname == groups['masters'][0]
+
+- name: Display join token info
+  debug:
+    msg: "Join token info: {{ add_node_output.stdout_lines }}"
   when: inventory_hostname == groups['masters'][0]
 
 - name: Extract join command for other masters
@@ -10,16 +37,40 @@
     master_join_command: "{{ add_node_output.stdout_lines | select('match', 'microk8s join.*') | first }}"
   when: inventory_hostname == groups['masters'][0] and add_node_output.stdout is defined
 
+# Replace any IP in the join command with the correct private IP
+- name: Update join command with correct private IP
+  set_fact:
+    master_join_command: "{{ master_join_command | regex_replace('[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+', master_ip) }}"
+  when: inventory_hostname == groups['masters'][0] and master_join_command is defined
+
 - name: Share join command with other masters
   set_fact:
     master_join_command: "{{ hostvars[groups['masters'][0]]['master_join_command'] }}"
   when: inventory_hostname != groups['masters'][0]
 
+# Check if node is already joined
+- name: Check if node is already part of the cluster
+  shell: "microk8s kubectl get nodes | grep $(hostname) || true"
+  register: node_check
+  changed_when: false
+  when: inventory_hostname != groups['masters'][0]
+  ignore_errors: yes
+
 - name: Join secondary masters to the cluster
   command: "{{ master_join_command }}"
   register: join_result
-  failed_when: join_result.rc != 0 and 'already exists' not in join_result.stderr
+  failed_when: join_result.rc != 0 and 'already exists' not in join_result.stderr and 'already known to dqlite' not in join_result.stdout
   changed_when: join_result.rc == 0
-  when: 
+  when:
     - inventory_hostname != groups['masters'][0]
     - master_join_command is defined
+    - node_check.stdout == ""
+
+- name: Wait for MicroK8s to be ready after joining
+  command: microk8s status --wait-ready
+  changed_when: false
+  when: inventory_hostname != groups['masters'][0]
+  register: join_status
+  until: join_status.rc == 0
+  retries: 5
+  delay: 10

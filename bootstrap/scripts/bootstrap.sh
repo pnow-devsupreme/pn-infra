@@ -15,6 +15,24 @@ ANSIBLE_DIR="${SCRIPT_DIR}/../ansible"
 # Default values
 INVENTORY="production"
 VERBOSE=""
+START_STEP=1
+SKIP_CONFIRM=0
+ANSIBLE_OPTS=""
+
+# Usage information
+function usage {
+  echo "Usage: $0 [OPTIONS]"
+  echo "Bootstrap a Kubernetes cluster with MicroK8s and ArgoCD"
+  echo ""
+  echo "Options:"
+  echo "  -i, --inventory INVENTORY  Specify the inventory file to use (default: production)"
+  echo "  -v, --verbose              Enable verbose output"
+  echo "  -s, --start-step STEP      Start from a specific step (1=Prepare, 2=MicroK8s, 3=ArgoCD)"
+  echo "  -y, --yes                  Skip confirmation prompts"
+  echo "  -e, --extra-vars VARS      Pass extra variables to ansible (e.g. 'foo=bar baz=qux')"
+  echo "  -h, --help                 Show this help message"
+  exit 0
+}
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -27,15 +45,20 @@ while [[ $# -gt 0 ]]; do
       VERBOSE="-v"
       shift
       ;;
+    -s|--start-step)
+      START_STEP="$2"
+      shift 2
+      ;;
+    -y|--yes)
+      SKIP_CONFIRM=1
+      shift
+      ;;
+    -e|--extra-vars)
+      ANSIBLE_OPTS="$ANSIBLE_OPTS --extra-vars '$2'"
+      shift 2
+      ;;
     -h|--help)
-      echo "Usage: $0 [OPTIONS]"
-      echo "Bootstrap a Kubernetes cluster with MicroK8s and ArgoCD"
-      echo ""
-      echo "Options:"
-      echo "  -i, --inventory INVENTORY  Specify the inventory file to use (default: production)"
-      echo "  -v, --verbose              Enable verbose output"
-      echo "  -h, --help                 Show this help message"
-      exit 0
+      usage
       ;;
     *)
       echo "Unknown option: $1"
@@ -54,18 +77,34 @@ fi
 
 echo -e "${BLUE}=== Starting cluster bootstrap process ===${NC}"
 echo -e "${BLUE}Using inventory: ${INVENTORY_FILE}${NC}"
+echo -e "${BLUE}Starting from step: ${START_STEP}${NC}"
+
+if [ $SKIP_CONFIRM -eq 0 ]; then
+  read -p "Continue? (y/n) " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "${RED}Aborting...${NC}"
+    exit 1
+  fi
+fi
 
 # Step 1: Prepare nodes
-echo -e "${GREEN}Step 1: Preparing nodes...${NC}"
-ansible-playbook ${VERBOSE} -i "${INVENTORY_FILE}" "${ANSIBLE_DIR}/playbooks/prepare-nodes.yml"
+if [ $START_STEP -le 1 ]; then
+  echo -e "${GREEN}Step 1: Preparing nodes...${NC}"
+  ansible-playbook ${VERBOSE} -i "${INVENTORY_FILE}" "${ANSIBLE_DIR}/playbooks/prepare-nodes.yml" --ask-become-pass $ANSIBLE_OPTS
+fi
 
 # Step 2: Deploy MicroK8s
-echo -e "${GREEN}Step 2: Deploying MicroK8s...${NC}"
-ansible-playbook ${VERBOSE} -i "${INVENTORY_FILE}" "${ANSIBLE_DIR}/playbooks/deploy-microk8s.yml"
+if [ $START_STEP -le 2 ]; then
+  echo -e "${GREEN}Step 2: Deploying MicroK8s...${NC}"
+  ansible-playbook ${VERBOSE} -i "${INVENTORY_FILE}" "${ANSIBLE_DIR}/playbooks/deploy-microk8s.yml" --ask-become-pass $ANSIBLE_OPTS
+fi
 
 # Step 3: Bootstrap ArgoCD
-echo -e "${GREEN}Step 3: Bootstrapping ArgoCD...${NC}"
-ansible-playbook ${VERBOSE} -i "${INVENTORY_FILE}" "${ANSIBLE_DIR}/playbooks/bootstrap-argocd.yml"
+if [ $START_STEP -le 3 ]; then
+  echo -e "${GREEN}Step 3: Bootstrapping ArgoCD...${NC}"
+  ansible-playbook ${VERBOSE} -i "${INVENTORY_FILE}" "${ANSIBLE_DIR}/playbooks/bootstrap-argocd.yml" --ask-become-pass $ANSIBLE_OPTS
+fi
 
 echo -e "${GREEN}=== Cluster bootstrap completed successfully ===${NC}"
 echo -e "${YELLOW}Next steps:${NC}"

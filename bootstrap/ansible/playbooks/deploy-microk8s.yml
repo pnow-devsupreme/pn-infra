@@ -3,14 +3,14 @@
   hosts: all
   become: yes
   roles:
-    - microk8s
+    - ../roles/microk8s
 
 - name: Configure HA for MicroK8s
   hosts: masters
   become: yes
   tasks:
     - include_role:
-        name: microk8s
+        name: ../roles/microk8s
         tasks_from: ha
       when: ha_enabled | bool
 
@@ -19,14 +19,13 @@
   become: yes
   tasks:
     - include_role:
-        name: microk8s
+        name: ../roles/microk8s
         tasks_from: workers
       when: groups['workers'] | length > 0
-
-- name: Configure MicroK8s addons
-  hosts: masters
-  become: yes
-  tasks:
-    - include_role:
-        name: microk8s
-        tasks_from: addons
+# - name: Configure MicroK8s addons
+#   hosts: masters
+#   become: yes
+#   tasks:
+#     - include_role:
+#         name: ../roles/microk8s
+#         tasks_from: addons
