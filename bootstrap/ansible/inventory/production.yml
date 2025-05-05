@@ -1,0 +1,42 @@
+all:
+  children:
+    masters:
+      hosts:
+        master1:
+          ansible_host: 192.168.100.30
+          node_labels: 
+            - "storage=true"
+        master2:
+          ansible_host: 192.168.100.32
+        master3:
+          ansible_host: 192.168.100.35
+      vars:
+        node_role: master
+    workers:
+      hosts:
+        worker1:
+          ansible_host: 192.168.100.33
+        worker2:
+          ansible_host: 192.168.100.34
+        worker3:
+          ansible_host: 192.168.100.31
+          node_labels: 
+            - "storage=true"
+      vars:
+        node_role: worker
+  vars:
+    ansible_user: ubuntu
+    ansible_ssh_private_key_file: ~/.ssh/id_rsa
+    ansible_become: yes
+    kubernetes_version: "1.32"
+    microk8s_channel: "1.32/stable"
+    cluster_name: "pn-production"
+    pod_network_cidr: "10.244.0.0/16"
+    service_cidr: "10.96.0.0/12"
+    metallb_enabled: true
+    metallb_address_pool: "103.110.174.27-103.110.174.28"
+    ha_enabled: true
+    enable_addons:
+      - dns
+      - metrics-server
+      - metallb

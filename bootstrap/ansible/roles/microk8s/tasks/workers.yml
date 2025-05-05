@@ -1,0 +1,20 @@
+---
+- name: Get worker join token from primary master
+  command: microk8s add-node --worker
+  register: worker_add_node_output
+  changed_when: false
+  when: inventory_hostname == groups['masters'][0]
+
+- name: Extract join command for workers
+  set_fact:
+    worker_join_command: "{{ worker_add_node_output.stdout_lines | select('match', 'microk8s join.*') | first }}"
+  when: inventory_hostname == groups['masters'][0] and worker_add_node_output.stdout is defined
+
+- name: Join workers to the cluster
+  command: "{{ hostvars[groups['masters'][0]]['worker_join_command'] }}"
+  register: worker_join_result
+  failed_when: worker_join_result.rc != 0 and 'already exists' not in worker_join_result.stderr
+  changed_when: worker_join_result.rc == 0
+  when: 
+    - inventory_hostname in groups['workers']
+    - hostvars[groups['masters'][0]]['worker_join_command'] is defined

@@ -1,0 +1,15 @@
+---
+- name: Enable MicroK8s addons
+  command: "microk8s enable {{ item }}"
+  with_items: "{{ enable_addons }}"
+  register: addon_result
+  changed_when: "'Addon {{ item }} is already enabled.' not in addon_result.stdout"
+  when: inventory_hostname == groups['masters'][0]
+
+- name: Configure MetalLB
+  command: "microk8s enable metallb:{{ metallb_address_pool }}"
+  register: metallb_result
+  changed_when: "'MetalLB is already enabled' not in metallb_result.stdout"
+  when: 
+    - inventory_hostname == groups['masters'][0]
+    - metallb_enabled | bool
