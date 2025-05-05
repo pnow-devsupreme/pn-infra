@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/YOURUSERNAME/proficient-now-infra.git
+    repoURL: https://github.com/pnow-devsupreme/pn-infra.git
     targetRevision: HEAD
     path: applications/infrastructure
   destination:

@@ -25,7 +25,7 @@ all:
       vars:
         node_role: worker
   vars:
-    ansible_user: ubuntu
+    ansible_user: devsupreme
     ansible_ssh_private_key_file: ~/.ssh/id_rsa
     ansible_become: yes
     kubernetes_version: "1.32"
