@@ -29,7 +29,7 @@ all:
     ansible_ssh_private_key_file: /home/devsupreme/.ssh-manager/keys/pn-production-k8s/id_ed25519_production_main_devsupreme_20250426-002820
     ansible_become: yes
     kubernetes_version: "1.32"
-    microk8s_channel: "1.32/stable"
+    microk8s_channel: "1.32"
     cluster_name: "pn-production"
     pod_network_cidr: "10.244.0.0/16"
     service_cidr: "10.96.0.0/12"
