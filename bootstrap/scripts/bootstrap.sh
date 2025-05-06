@@ -106,6 +106,12 @@ if [ $START_STEP -le 3 ]; then
   ansible-playbook ${VERBOSE} -i "${INVENTORY_FILE}" "${ANSIBLE_DIR}/playbooks/bootstrap-argocd.yml" --ask-become-pass $ANSIBLE_OPTS
 fi
 
+# Step 4: Apply GitOps Entrypoint
+if [ $START_STEP -le 4 ]; then
+  echo -e "${GREEN}Step 4: Applying GitOps Entrypoint...${NC}"
+  ansible-playbook ${VERBOSE} -i "${INVENTORY_FILE}" "${ANSIBLE_DIR}/playbooks/apply-gitops-entrypoint.yml" --ask-become-pass $ANSIBLE_OPTS
+fi
+
 echo -e "${GREEN}=== Cluster bootstrap completed successfully ===${NC}"
 echo -e "${YELLOW}Next steps:${NC}"
 echo -e "1. Apply the root application manifest to start GitOps"

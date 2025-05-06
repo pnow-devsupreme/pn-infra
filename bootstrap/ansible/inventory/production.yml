@@ -40,6 +40,11 @@ all:
     cluster_name: "pn-production"
     pod_network_cidr: "10.244.0.0/16"
     service_cidr: "10.96.0.0/12"
+    git_repo_url: "git@github.com:pnow-devsupreme/pn-infra.git"
+    git_repo_branch: "v0.1.0-p0-foundation"
+    repo_clone_path: "/tmp/pn-infra"
+    ssh_key_path_local: "/home/devsupreme/.ssh/github_keys"
+    ssh_key_path_remote: "/tmp/github_ssh_key"
     metallb_enabled: true
     metallb_address_pool: "103.110.174.27-103.110.174.28"
     ha_enabled: true
