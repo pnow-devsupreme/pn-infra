@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: environments
+  namespace: argocd
+spec:
+  description: Environment-specific configurations
+  sourceRepos:
+    - git@github.com:pnow-devsupreme/pn-infra.git
+  destinations:
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  # syncWindows:
+  #   - kind: allow
+  #     schedule: "* * * * *"
+  #     duration: 24h
+  #     applications:
+  #       - argocd-self
+  #     manualSync: true
+  #     dependencies:
+  #       - name: root-application
+  #         namespace: argocd

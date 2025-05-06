@@ -4,7 +4,7 @@ metadata:
   name: infrastructure-root
   namespace: argocd
 spec:
-  project: default
+  project: infrastructure
   source:
     repoURL: git@github.com:pnow-devsupreme/pn-infra.git
     targetRevision: v0.1.0-p0-foundation

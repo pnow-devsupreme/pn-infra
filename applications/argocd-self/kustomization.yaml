@@ -4,3 +4,4 @@ metadata:
   name: argocd-self-kustomize
 resources:
   - ssl-certificate/
+  - argo-projects/

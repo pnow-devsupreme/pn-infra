@@ -1,0 +1,29 @@
+# deployments/bootstrap/argocd/base/manifests/projects.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infrastructure
+  namespace: argocd
+spec:
+  description: Project for deploying all Infrastructure Components
+  sourceRepos:
+    - git@github.com:pnow-devsupreme/pn-infra.git
+  destinations:
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  syncWindows:
+    - kind: allow
+      schedule: "* * * * *"
+      duration: 300s
+      applications:
+        - infrastructure-root
+      manualSync: true
+      dependencies:
+        - name: root-application
+          namespace: argocd
