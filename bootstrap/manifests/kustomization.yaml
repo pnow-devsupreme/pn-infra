@@ -4,4 +4,4 @@ metadata:
   name: root-application-kustomization
 resources:
   - root-application.yaml
-  # - argocd-self-project.yaml
+  - argocd-self-project.yaml
