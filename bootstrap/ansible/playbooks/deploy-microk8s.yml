@@ -22,10 +22,11 @@
         name: ../roles/microk8s
         tasks_from: workers
       when: groups['workers'] | length > 0
-# - name: Configure MicroK8s addons
-#   hosts: masters
-#   become: yes
-#   tasks:
-#     - include_role:
-#         name: ../roles/microk8s
-#         tasks_from: addons
+
+- name: Configure MicroK8s addons
+  hosts: masters
+  become: yes
+  tasks:
+    - include_role:
+        name: ../roles/microk8s
+        tasks_from: addons

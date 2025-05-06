@@ -29,10 +29,10 @@ spec:
       applications:
         - argocd-self
       manualSync: true
-      dependencies:
-        - name: infrastructure-root
-          namespace: argocd
-        - name: cert-manager
-          namespace: argocd
-        - name: ingress-nginx
-          namespace: argocd
+      # dependencies:
+      #   - name: infrastructure-root
+      #     namespace: argocd
+      #   - name: cert-manager
+      #     namespace: argocd
+      #   - name: ingress-nginx
+      #     namespace: argocd
