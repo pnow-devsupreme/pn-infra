@@ -1,8 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 resources:
-  - infrastructure.yaml
+  - infrastructure-root-app.yaml
+  - argocd-self-app.yaml
   # Uncomment as you implement more applications
   # - applications.yaml
   # - workloads.yaml
