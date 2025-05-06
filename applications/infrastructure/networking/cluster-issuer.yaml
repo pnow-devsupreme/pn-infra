@@ -9,8 +9,12 @@ spec:
     server: https://acme-v02.api.letsencrypt.org/directory
     email: snoorullah@proficientnowtech.com
     privateKeySecretRef:
-      name: letsencrypt-prod
+      # This is the secret Cert-manager will create to store its account key
+      name: letsencrypt-dns-account-key
     solvers:
-      - http01:
-          ingress:
-            class: nginx
+      - dns01:
+          cloudflare:
+            # You must match the name/namespace of the secret you created
+            apiTokenSecretRef:
+              name: cloudflare-api-token-secret
+              key: api-token
