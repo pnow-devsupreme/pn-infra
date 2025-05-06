@@ -4,7 +4,7 @@ metadata:
   name: argocd-self
   namespace: argocd
 spec:
-  project: argocd-self-project
+  project: default
   source:
     repoURL: git@github.com:pnow-devsupreme/pn-infra.git
     targetRevision: v0.1.0-p0-foundation
