@@ -5,4 +5,4 @@ metadata:
 resources:
   - nginx-ingress.yaml
   - cert-manager.yaml
-  # - cluster-issuer.yaml
+  - cluster-issuer.yaml
