@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - networking
+  - ml-infra
   # Uncomment as you implement more applications
   # - storage/rook-ceph.yaml
   # - storage/minio.yaml
