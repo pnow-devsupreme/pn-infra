@@ -96,7 +96,6 @@ spec:
               operator: Exists
               effect: NoSchedule
           provisionerPriorityClassName: system-cluster-critical
-          provisionerReplicas: 1
 
           # CSI plugin placement - also targets the control plane node
           pluginNodeAffinity: "kubernetes.io/hostname=pn-hyd-wr02-1a"
