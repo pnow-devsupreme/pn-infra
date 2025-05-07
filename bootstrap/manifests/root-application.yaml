@@ -4,10 +4,11 @@ metadata:
   name: root-application
   namespace: argocd
 spec:
-  project: default
+  project: root-application-project # change this to root-application-project only after all argo projects have been deployed.
   source:
     repoURL: git@github.com:pnow-devsupreme/pn-infra.git
-    targetRevision: v0.1.0-p0-foundation
+     # targetRevision: v0.1.0-p0-foundation for first phase use this branch.
+    targetRevision: v0.2.0-p0-infra
     path: applications/platform-apps
   destination:
     server: https://kubernetes.default.svc
