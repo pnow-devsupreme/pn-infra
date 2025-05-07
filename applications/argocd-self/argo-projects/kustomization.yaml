@@ -6,5 +6,5 @@ resources:
   - infrastructure-project.yaml
   - applications-project.yaml
   - workloads-project.yaml
-  - environment-project.yaml
+  - environments-project.yaml
   - root-application-project.yaml
