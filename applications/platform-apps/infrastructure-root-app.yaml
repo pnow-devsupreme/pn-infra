@@ -4,7 +4,7 @@ metadata:
   name: infrastructure-root
   namespace: argocd
 spec:
-  project: infrastructure # change this to infrastructure only after all argo projects have been deployed.
+  project: default # change this to infrastructure only after all argo projects have been deployed.
   source:
     repoURL: git@github.com:pnow-devsupreme/pn-infra.git
     # targetRevision: v0.1.0-p0-foundation for first phase use this branch.
