@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "10"
 spec:
-  project: root-application-project # change this to root-application-project only after all argo projects have been deployed.
+  project: default # change this to root-application-project only after all argo projects have been deployed.
   source:
     repoURL: git@github.com:pnow-devsupreme/pn-infra.git
     # targetRevision: v0.1.0-p0-foundation for first phase use this branch.
