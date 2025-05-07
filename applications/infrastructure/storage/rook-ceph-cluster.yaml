@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://charts.rook.io/release'
+    repoURL: "https://charts.rook.io/release"
     targetRevision: v1.15.7
     chart: rook-ceph-cluster
     helm:
@@ -30,15 +30,16 @@ spec:
                         values:
                           - pn-hyd-wr02-1a
           tolerations:
-          - key: node-role.kubernetes.io/control-plane
-            operator: Exists
-            effect: NoSchedule
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
           resources:
             limits:
-              memory: "1Gi"
+              cpu: 500m
+              memory: 1Gi
             requests:
-              cpu: "100m"
-              memory: "128Mi"
+              cpu: 100m
+              memory: 256Mi
         operatorNamespace: rook-ceph
         clusterName: rook-ceph-cluster
         monitoring:
@@ -73,10 +74,10 @@ spec:
           dataDirHostPath: /var/lib/rook
           # Currently Single node configuration
           mon:
-            count: 1
+            count: 10
             allowMultiplePerNode: true
           mgr:
-            count: 1
+            count: 10
             allowMultiplePerNode: true
           dashboard:
             enabled: true
@@ -91,15 +92,16 @@ spec:
               nodeAffinity:
                 requiredDuringSchedulingIgnoredDuringExecution:
                   nodeSelectorTerms:
-                  - matchExpressions:
-                    - key: kubernetes.io/hostname
-                      operator: In
-                      values:
-                      - pn-hyd-wr02-1a
+                    - matchExpressions:
+                        - key: kubernetes.io/hostname
+                          operator: In
+                          values:
+                            - pn-hyd-wr*
+                            - pn-hyd-ms01-1a
               tolerations:
-              - key: node-role.kubernetes.io/control-plane
-                operator: Exists
-                effect: NoSchedule
+                - key: node-role.kubernetes.io/control-plane
+                  operator: Exists
+                  effect: NoSchedule
             crashcollector:
               nodeAffinity:
                 requiredDuringSchedulingIgnoredDuringExecution:
@@ -108,7 +110,7 @@ spec:
                         - key: kubernetes.io/hostname
                           operator: In
                           values:
-                            - pn-hyd-wr02-1a
+                            - pn-hyd-ms01-1a
               tolerations:
                 - key: node-role.kubernetes.io/control-plane
                   operator: Exists
@@ -122,7 +124,7 @@ spec:
                         - key: kubernetes.io/hostname
                           operator: In
                           values:
-                            - pn-hyd-wr02-1a
+                            - pn-hyd-wr*
               tolerations:
                 - key: node-role.kubernetes.io/control-plane
                   operator: Exists
@@ -132,11 +134,12 @@ spec:
               nodeAffinity:
                 requiredDuringSchedulingIgnoredDuringExecution:
                   nodeSelectorTerms:
-                  - matchExpressions:
-                    - key: kubernetes.io/hostname
-                      operator: In
-                      values:
-                      - pn-hyd-wr02-1a
+                    - matchExpressions:
+                        - key: kubernetes.io/hostname
+                          operator: In
+                          values:
+                            - pn-hyd-ms01-1a
+                            - pn-hyd-wr02-1a
               tolerations:
                 - key: node-role.kubernetes.io/control-plane
                   operator: Exists
@@ -150,6 +153,7 @@ spec:
                         - key: kubernetes.io/hostname
                           operator: In
                           values:
+                            - pn-hyd-ms01-1a
                             - pn-hyd-wr02-1a
               tolerations:
                 - key: node-role.kubernetes.io/control-plane
@@ -159,52 +163,60 @@ spec:
           resources:
             mgr:
               limits:
-                memory: "1Gi"
+                cpu: 2
+                memory: 2Gi
               requests:
-                cpu: "500m"
-                memory: "512Mi"
+                cpu: 500m
+                memory: 512Mi
             mon:
               limits:
-                memory: "2Gi"
+                cpu: 4
+                memory: 2Gi
               requests:
-                cpu: "1000m"
-                memory: "1Gi"
+                cpu: 1
+                memory: 1Gi
             osd:
               limits:
-                memory: "2Gi"
+                cpu: 4
+                memory: 3Gi
               requests:
-                cpu: "1000m"
-                memory: "1500Mi"
+                cpu: 2
+                memory: 1500Mi
             mgr-sidecar:
               limits:
-                memory: "100Mi"
+                cpu: 200m
+                memory: 200Mi
               requests:
-                cpu: "100m"
-                memory: "40Mi"
+                cpu: 100m
+                memory: 100Mi
             crashcollector:
               limits:
-                memory: "60Mi"
+                cpu: 200m
+                memory: 60Mi
               requests:
-                cpu: "100m"
-                memory: "60Mi"
+                cpu: 100m
+                memory: 60Mi
             logcollector:
               limits:
-                memory: "1Gi"
+                cpu: 200m
+                memory: 1Gi
               requests:
-                cpu: "100m"
-                memory: "100Mi"
+                cpu: 100m
+                memory: 100Mi
             cleanup:
               limits:
-                memory: "1Gi"
+                cpu: 1
+                memory: 1Gi
               requests:
-                cpu: "500m"
-                memory: "100Mi"
+                cpu: 500m
+                memory: 100Mi
             exporter:
               limits:
-                memory: "128Mi"
+                cpu: 200m
+                memory: 128Mi
               requests:
-                cpu: "50m"
-                memory: "50Mi"
+                cpu: 100m
+                memory: 50Mi
           # priority classes to apply to ceph resources
           priorityClassNames:
             mon: system-node-critical
@@ -229,19 +241,27 @@ spec:
                   - name: "/dev/sdc2"
                   - name: "/dev/sdc3"
                   - name: "/dev/sdc4"
+
+              - name: "pn-hyd-ms02-1a"
+                devices:
+                  - name: "/dev/sda3"
+              - name: "pn-hyd-wr02-1a"
+                devices:
+                  - name: "/dev/sda2"
+                  - name: "/dev/sda3"
           # Configure the healthcheck and liveness probes for ceph pods.
           # Valid values for daemons are 'mon', 'osd', 'status'
           healthCheck:
             daemonHealth:
               mon:
                 disabled: false
-                interval: 45s
+                interval: 25s
               osd:
                 disabled: false
-                interval: 60s
+                interval: 30s
               status:
                 disabled: false
-                interval: 60s
+                interval: 30s
             # Change pod liveness probe, it works for all mon, mgr, and osd pods.
             livenessProbe:
               mon:
@@ -274,7 +294,7 @@ spec:
             spec:
               failureDomain: osd # Using OSD as failure domain since all on same node
               replicated:
-                size: 1 # No replication as requested
+                size: 6 # No replication as requested
             storageClass:
               enabled: true
               name: ceph-block-storage-pool
@@ -297,20 +317,21 @@ spec:
             spec:
               metadataPool:
                 replicated:
-                  size: 1
+                  size: 3
               dataPools:
                 - name: data0
                   replicated:
-                    size: 1
+                    size: 3
               metadataServer:
                 activeCount: 1
                 activeStandby: true
                 resources:
                   limits:
-                    memory: "4Gi"
+                    cpu: 4
+                    memory: 4Gi
                   requests:
-                    cpu: "1000m"
-                    memory: "4Gi"
+                    cpu: 1000m
+                    memory: 4Gi
                 priorityClassName: system-cluster-critical
             storageClass:
               enabled: true
@@ -328,8 +349,8 @@ spec:
                 csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
                 csi.storage.k8s.io/node-stage-secret-namespace: "rook-ceph"
         cephFileSystemVolumeSnapshotClass:
-          enabled: false
-          name: ceph-filesystem
+          enabled: true
+          name: ceph-filesystem-volume-snapshot-class
           isDefault: true
           deletionPolicy: Delete
           annotations: {}
@@ -340,9 +361,9 @@ spec:
         # -- Settings for the block pool snapshot class
         # @default -- See [RBD Snapshots](../Storage-Configuration/Ceph-CSI/ceph-csi-snapshot.md#rbd-snapshots)
         cephBlockPoolsVolumeSnapshotClass:
-          enabled: false
-          name: ceph-block
-          isDefault: false
+          enabled: true
+          name: ceph-block-pool-volume-snapshot-class
+          isDefault: true
           deletionPolicy: Delete
           annotations: {}
           labels: {}

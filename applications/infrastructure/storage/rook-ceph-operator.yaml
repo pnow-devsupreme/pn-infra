@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://charts.rook.io/release'
+    repoURL: "https://charts.rook.io/release"
     targetRevision: v1.15.7
     chart: rook-ceph
     helm:
@@ -24,10 +24,11 @@ spec:
         # Resource Configuration
         resources:
           limits:
-            memory: 512Mi
+            cpu: 2
+            memory: 2Gi
           requests:
-            cpu: 200m
-            memory: 128Mi
+            cpu: 500m
+            memory: 500Mi
 
         # Security Configuration
         pspEnable: false
@@ -62,35 +63,39 @@ spec:
         # CSI Configuration
         csi:
           enableCSIHostNetwork: true
-          provisionerReplicas: 2
+          provisionerReplicas: 4
           enableCSIEncryption: false
-          logLevel: "0"
+          logLevel: 0
           enableVolumeReplication: true
 
           # CSI Resources
           csiRBDProvisionerResource:
             limits:
-              memory: 256Mi
+              cpu: 1
+              memory: 1Gi
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 500m
+              memory: 500Mi
           csiRBDPluginResource:
             limits:
-              memory: 256Mi
+              cpu: 1
+              memory: 1Gi
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 500m
+              memory: 500Mi
 
           # CSI Topology
           topology:
-            enabled: false
+            enabled: true
             domainLabels:
               - kubernetes.io/hostname
               - topology.kubernetes.io/zone
 
           # CSI Node Placement
           # CSI provisioner configuration - handles the actual mounting of volumes on nodes
-          provisionerNodeAffinity: "kubernetes.io/hostname=pn-hyd-wr02-1a"
+          provisionerNodeAffinity:
+            - "kubernetes.io/hostname=pn-hyd-wr02-1a"
+            - "kubernetes.io/hostname=pn-hyd-ms01-1a"
           provisionerTolerations:
             - key: node-role.kubernetes.io/control-plane
               operator: Exists
@@ -117,6 +122,7 @@ spec:
                       operator: In
                       values:
                         - pn-hyd-wr02-1a
+                        - pn-hyd-ms01-1a
           tolerationKey: node-role.kubernetes.io/control-plane
           tolerations:
             - key: node-role.kubernetes.io/control-plane

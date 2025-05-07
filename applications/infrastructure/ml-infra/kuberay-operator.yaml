@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kuberay-operator
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: kuberay-operator
+    app.kubernetes.io/part-of: gpu-infrastructure
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/ray-project/kuberay
+    targetRevision: v1.0.0-rc.0
+    path: helm-chart/kuberay-operator
+    helm:
+      skipCrds: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gpu-resources
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - Replace=true
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true
+      - PrunePropagationPolicy=foreground

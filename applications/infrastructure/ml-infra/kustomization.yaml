@@ -4,3 +4,5 @@ metadata:
   name: gpu-operator-kustomize
 resources:
   - gpu-operator.yaml
+  - kuberay-operator-crds.yaml
+  - kuberay-operator.yaml
