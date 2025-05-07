@@ -10,6 +10,7 @@ spec:
   destinations:
     - namespace: argocd
       server: https://kubernetes.default.svc
+      name: in-cluster
   clusterResourceWhitelist:
     - group: ""
       kind: Application
@@ -19,6 +20,10 @@ spec:
       kind: ApplicationSet
     - group: ""
       kind: AppProject
+    - group: ''
+      kind: Ingress
+    - group: ''
+      kind: Certificate
   namespaceResourceWhitelist:
     - group: ""
       kind: Application
@@ -26,6 +31,10 @@ spec:
       kind: ApplicationSet
     - group: ""
       kind: AppProject
+    - group: ''
+      kind: Ingress
+    - group: ''
+      kind: Certificate
   roles:
   - name: admin
     description: Admin privileges to root-application-project
@@ -38,6 +47,4 @@ spec:
     - p, proj:root-application-project:admin, namespaces, get, *, allow
     - p, proj:root-application-project:admin, namespaces, update, *, allow
     - p, proj:root-application-project:admin, namespaces, delete, *, allow
-  permitOnlyProjectScopedClusters: true
-  sourceNamespaces:
-    - "argocd"
+
