@@ -9,7 +9,11 @@ spec:
   sourceRepos:
     - git@github.com:pnow-devsupreme/pn-infra.git
   destinations:
-    - namespace: argocd
+    - namespace: "pnats-*"
+      server: https://kubernetes.default.svc
+    - namespace: "infrastructure*"
+      server: https://kubernetes.default.svc
+    - namespace: "argocd"
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: "*"
@@ -17,13 +21,6 @@ spec:
   namespaceResourceWhitelist:
     - group: "*"
       kind: "*"
-  syncWindows:
-    - kind: allow
-      schedule: "* * * * *"
-      duration: 300s
-      applications:
-        - infrastructure-root
-      manualSync: true
-      dependencies:
-        - name: root-application
-          namespace: argocd
+  sourceNamespaces:
+    - "infrastructure*"
+    - "argocd"

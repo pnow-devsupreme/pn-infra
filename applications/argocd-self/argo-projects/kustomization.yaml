@@ -4,6 +4,7 @@ metadata:
   name: argocd-projects-kustomization
 resources:
   - infrastructure-project.yaml
-  # - applications-project.yaml
-  # - workloads-project.yaml
-  # - environment-project.yaml
+  - applications-project.yaml
+  - workloads-project.yaml
+  - environment-project.yaml
+  - root-application-project.yaml

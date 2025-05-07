@@ -4,12 +4,20 @@ metadata:
   name: workloads
   namespace: argocd
 spec:
-  description: Workload Components
+  description: ML/Compute Workload Deployments
   sourceRepos:
-    - "*"
+    - git@github.com:pnow-devsupreme/pn-infra.git
   destinations:
-    - namespace: "workload-*"
+    - namespace: "workloads*"
       server: https://kubernetes.default.svc
+    - namespace: "argocd"
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
   namespaceResourceWhitelist:
     - group: "*"
       kind: "*"
+  sourceNamespaces:
+    - "workloads*"
+    - "argocd"
