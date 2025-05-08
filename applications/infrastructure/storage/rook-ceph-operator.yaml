@@ -94,8 +94,8 @@ spec:
           # CSI Node Placement
           # CSI provisioner configuration - handles the actual mounting of volumes on nodes
           provisionerNodeAffinity:
-            - "kubernetes.io/hostname=pn-hyd-wr02-1a"
-            - "kubernetes.io/hostname=pn-hyd-ms01-1a"
+            - kubernetes.io/hostname=pn-hyd-wr02-1a
+            - kubernetes.io/hostname=pn-hyd-ms01-1a
           provisionerTolerations:
             - key: node-role.kubernetes.io/control-plane
               operator: Exists
