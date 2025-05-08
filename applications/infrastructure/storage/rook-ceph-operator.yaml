@@ -46,7 +46,7 @@ spec:
 
         # Node Placement Configuration
         nodeSelector:
-          kubernetes.io/hostname: "pn-hyd-wr02-1a"
+          kubernetes.io/hostname: pn-hyd-wr02-1a,pn-hyd-ms01-1a,pn-hyd-ms02-1a
         tolerations:
           - key: node-role.kubernetes.io/control-plane
             operator: Exists
@@ -54,7 +54,7 @@ spec:
         placement:
           all:
             nodeSelector:
-              kubernetes.io/hostname: "pn-hyd-wr02-1a"
+              kubernetes.io/hostname: pn-hyd-wr02-1a,pn-hyd-ms01-1a,pn-hyd-ms02-1a
             tolerations:
               - key: node-role.kubernetes.io/control-plane
                 operator: Exists
@@ -71,17 +71,17 @@ spec:
           # CSI Resources
           csiRBDProvisionerResource:
             limits:
-              cpu: 1
+              cpu: 2
               memory: 1Gi
             requests:
-              cpu: 500m
+              cpu: 1
               memory: 500Mi
           csiRBDPluginResource:
             limits:
-              cpu: 1
+              cpu: 2
               memory: 1Gi
             requests:
-              cpu: 500m
+              cpu: 1
               memory: 500Mi
 
           # CSI Topology
@@ -93,9 +93,7 @@ spec:
 
           # CSI Node Placement
           # CSI provisioner configuration - handles the actual mounting of volumes on nodes
-          provisionerNodeAffinity:
-            - kubernetes.io/hostname=pn-hyd-wr02-1a
-            - kubernetes.io/hostname=pn-hyd-ms01-1a
+          provisionerNodeAffinity: "kubernetes.io/hostname=pn-hyd-wr02-1a,pn-hyd-ms01-1a,pn-hyd-ms02-1a"
           provisionerTolerations:
             - key: node-role.kubernetes.io/control-plane
               operator: Exists
@@ -103,7 +101,7 @@ spec:
           provisionerPriorityClassName: system-cluster-critical
 
           # CSI plugin placement - also targets the control plane node
-          pluginNodeAffinity: "kubernetes.io/hostname=pn-hyd-wr02-1a"
+          pluginNodeAffinity: "kubernetes.io/hostname=pn-hyd-wr02-1a,pn-hyd-ms01-1a,pn-hyd-ms02-1a"
           pluginTolerations:
             - key: node-role.kubernetes.io/control-plane
               operator: Exists
@@ -112,7 +110,7 @@ spec:
 
         # Discovery Configuration
         enableDiscoveryDaemon: true
-        discoveryDaemonInterval: "60m"
+        discoveryDaemonInterval: 60m
         discover:
           nodeAffinity:
             requiredDuringSchedulingIgnoredDuringExecution:
@@ -123,6 +121,7 @@ spec:
                       values:
                         - pn-hyd-wr02-1a
                         - pn-hyd-ms01-1a
+                        - pn-hyd-ms02-1a
           tolerationKey: node-role.kubernetes.io/control-plane
           tolerations:
             - key: node-role.kubernetes.io/control-plane
