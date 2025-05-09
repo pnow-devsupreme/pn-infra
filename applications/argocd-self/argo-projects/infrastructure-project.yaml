@@ -2,14 +2,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: infrastructure
+  name: infra-team
   namespace: argocd
 spec:
-  description: Project for deploying all Infrastructure Components
+  description: "Project for deploying all Infrastructure Components"
   sourceRepos:
-    - git@github.com:pnow-devsupreme/pn-infra.git
+    - "*"
   destinations:
-    - namespace: "*"
+    - namespace: "*-infra*"
       server: https://kubernetes.default.svc
       name: in-cluster
   clusterResourceWhitelist:
@@ -18,3 +18,6 @@ spec:
   namespaceResourceWhitelist:
     - group: "*"
       kind: "*"
+  sourceNamespaces:
+    - "infra-pnats-*"
+    - argocd

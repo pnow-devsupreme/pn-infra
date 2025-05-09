@@ -4,13 +4,13 @@ metadata:
   name: nvidia-gpu-operator
   namespace: argocd
   labels:
-    app.kubernetes.io/name: nvidia-gpu-operator
-    app.kubernetes.io/part-of: gpu-infrastructure
+    apps.kubernetes.io/name: gpu-operator
+    apps.kubernetes.io/part-of: gpu-infrastructure
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: 0
     argocd.argoproj.io/sync-options: "SkipDryRun=true,ServerSideApply=true"
-    argocd.argoproj.io/compare-options: "IgnoreExtraneous"
-    argocd.argoproj.io/tracking-method: "annotation"
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/tracking-method: annotation
 spec:
   project: default
   source:
@@ -23,7 +23,7 @@ spec:
           value: containerd
   destination:
     server: https://kubernetes.default.svc
-    namespace: nvidia-gpu-operator
+    namespace: gpu-resources
   syncPolicy:
     automated:
       prune: true
@@ -38,9 +38,9 @@ spec:
     retry:
       limit: 5
       backoff:
-        duration: "30s"
+        duration: 30s
         factor: 2
-        maxDuration: "5m"
+        maxDuration: 5m
   ignoreDifferences:
     - group: nvidia.com
       kind: ClusterPolicy

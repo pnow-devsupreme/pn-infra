@@ -1,10 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: infrastructure-root
-  namespace: argocd
+  name: infrastructure-root-app
+  namespace: platform-pnats-prod
+  labels:
+    apps.kubernetes.io/name: infrastructure-root-app
+    apps.kubernetes.io/part-of: platform-layer
+  annotations:
+    argocd.argoproj.io/sync-wave: -50
+    argocd.argoproj.io/tracking-method: annotation+label
 spec:
-  project: default # change this to infrastructure only after all argo projects have been deployed.
+  project: platform-team
   source:
     repoURL: git@github.com:pnow-devsupreme/pn-infra.git
     # targetRevision: v0.1.0-p0-foundation for first phase use this branch.
@@ -12,7 +18,7 @@ spec:
     path: applications/infrastructure
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: infra-prod-apps
   syncPolicy:
     automated:
       prune: true
@@ -23,9 +29,12 @@ spec:
       - ServerSideApply=true
       - PrunePropagationPolicy=foreground
       - PruneLast=true
+      - Delete=confirm
+      - Prune=confirm
     retry:
       limit: 5
       backoff:
-        duration: "30s"
+        duration: 30s
         factor: 2
-        maxDuration: "5m"
+        maxDuration: 5m
+  revisionHistoryLimit: 30

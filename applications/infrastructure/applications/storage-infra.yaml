@@ -1,43 +1,42 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd-self-app
+  name: storage-infrastructure
   namespace: argocd
   labels:
-    apps.kubernetes.io/name: argocd-self-app
-    apps.kubernetes.io/part-of: platform-layer
+    app.kubernetes.io/name: rook-ceph
+    app.kubernetes.io/part-of: storage-infrastructure
   annotations:
-    argocd.argoproj.io/sync-wave: -25
-    argocd.argoproj.io/tracking-method: annotation+label
+    argocd.argoproj.io/sync-wave: 20
 spec:
-  project: platform-team
+  project: infrastructure
   source:
     repoURL: git@github.com:pnow-devsupreme/pn-infra.git
     targetRevision: v0.2.0-p0-infra
-    path: applications/argocd-self
+    path: applications/infrastructure/storage
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: infra-storage
   info:
     - name: Description
-      value: "This application is responsible to maintain the production deployment of argocd"
-    - name: Dashboard Address
-      value: https://argocd.pnats.cloud
+      value: "This application is responsible to deploy and maintain the storage infrastructure of pnats platform"
+    - name: Documentation
+      value: https://developers.pnats.tech
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
+      - CreateNamespace=true
+      - Replace=true
+      - PruneLast=true
       - ApplyOutOfSyncOnly=true
       - ServerSideApply=true
       - PrunePropagationPolicy=foreground
-      - PruneLast=true
-      - Prune=confirm
-      - Delete=confirm
     retry:
       limit: 5
       backoff:
         duration: 30s
         factor: 2
         maxDuration: 5m
-  revisionHistoryLimit: 30
+  revisionHistoryLimit: 10

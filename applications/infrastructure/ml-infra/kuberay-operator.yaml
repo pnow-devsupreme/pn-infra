@@ -4,8 +4,11 @@ metadata:
   name: kuberay-operator
   namespace: argocd
   labels:
-    app.kubernetes.io/name: kuberay-operator
-    app.kubernetes.io/part-of: gpu-infrastructure
+    apps.kubernetes.io/name: kuberay-operator
+    apps.kubernetes.io/part-of: gpu-infrastructure
+  annotations:
+    argocd.argoproj.io/sync-wave: 20
+    argocd.argoproj.io/tracking-method: annotation+label
 spec:
   project: default
   source:
@@ -22,9 +25,10 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
+      - SkipDryRun=true
+      - SkipDryRunOnMissingResource=true
+      - ServerSideApply=true
       - CreateNamespace=true
-      - Replace=true
       - PruneLast=true
       - ApplyOutOfSyncOnly=true
-      - ServerSideApply=true
       - PrunePropagationPolicy=foreground
