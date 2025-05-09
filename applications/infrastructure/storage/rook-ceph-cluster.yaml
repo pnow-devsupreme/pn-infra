@@ -270,15 +270,14 @@ spec:
                 disabled: false
               osd:
                 disabled: false
-        # Ingress configuration for Ceph Dashboard
         ingress:
           dashboard:
             enabled: true
             annotations:
               cert-manager.io/cluster-issuer: letsencrypt-prod
-              nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-              nginx.ingress.kubernetes.io/ssl-redirect: "true"
-              nginx.ingress.kubernetes.io/ssl-verify: "false"
+              nginx.ingress.kubernetes.io/backend-protocol: HTTP
+              nginx.ingress.kubernetes.io/ssl-redirect: true
+              nginx.ingress.kubernetes.io/ssl-verify: false
             ingressClassName: nginx
             host:
               name: ceph.pnats.cloud
@@ -292,25 +291,25 @@ spec:
         cephBlockPools:
           - name: ceph-block-replicapool
             spec:
-              failureDomain: osd # Using OSD as failure domain since all on same node
+              failureDomain: host
               replicated:
-                size: 6 # No replication as requested
+                size: 3
             storageClass:
               enabled: true
               name: ceph-block-storage-pool
               isDefault: true
               reclaimPolicy: Delete
               allowVolumeExpansion: true
-              volumeBindingMode: "Immediate"
+              volumeBindingMode: Immediate
               parameters:
                 imageFormat: "2"
                 imageFeatures: layering
                 csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
-                csi.storage.k8s.io/provisioner-secret-namespace: "rook-ceph"
+                csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
                 csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
-                csi.storage.k8s.io/controller-expand-secret-namespace: "rook-ceph"
+                csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
                 csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
-                csi.storage.k8s.io/node-stage-secret-namespace: "rook-ceph"
+                csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
                 csi.storage.k8s.io/fstype: ext4
         cephFileSystems:
           - name: ceph-fs
