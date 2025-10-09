@@ -1,0 +1,29 @@
+---
+# Default variables for infrastructure health checks
+
+# Health check timeouts (seconds)
+health_check_timeout: 300
+health_check_retry_delay: 10
+health_check_max_retries: 30
+
+# Component health check settings
+cilium_health_check_enabled: true
+nginx_ingress_health_check_enabled: true
+cert_manager_health_check_enabled: true
+vault_health_check_enabled: true
+argocd_health_check_enabled: true
+
+# Health endpoints
+nginx_health_port: 30080
+nginx_health_path: "/healthz"
+
+# Expected component counts
+expected_cilium_pods: "{{ groups['k8s_cluster'] | length }}"
+expected_nginx_replicas: 2
+expected_cert_manager_replicas: 2
+expected_vault_replicas: 3
+expected_argocd_replicas: 1
+
+# Health check report settings
+generate_health_report: true
+health_report_format: "console"  # console, json, yaml

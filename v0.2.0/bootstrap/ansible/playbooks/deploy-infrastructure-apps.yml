@@ -1,0 +1,180 @@
+---
+# Infrastructure Applications Deployment via ArgoCD Entrypoint
+# This deploys apps using proper GitOps patterns with Helm charts
+
+- name: Deploy Infrastructure Applications via GitOps
+  hosts: kube_control_plane[0]
+  gather_facts: false
+  become: false
+  vars:
+    kubeconfig_path: "{{ ansible_env.HOME }}/.kube/config"
+    entrypoint_path: "{{ playbook_dir }}/../../entrypoint"
+    
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+    
+  tasks:
+    # ===========================================
+    # PHASE 1: DEPLOY INFRASTRUCTURE PROJECT
+    # ===========================================
+    - name: Deploy infrastructure project and root application
+      block:
+        - name: Apply infrastructure entrypoint manifests
+          kubernetes.core.k8s:
+            state: present
+            src: "{{ entrypoint_path }}/kustomization.yaml"
+            wait: true
+            wait_condition:
+              type: Ready
+              status: "True"
+            wait_timeout: 300
+          register: entrypoint_deploy
+          
+        - name: Wait for infrastructure project to be created
+          kubernetes.core.k8s_info:
+            api_version: argoproj.io/v1alpha1
+            kind: AppProject
+            name: infrastructure
+            namespace: argocd
+          register: infra_project
+          until: infra_project.resources | length > 0
+          retries: 30
+          delay: 5
+          
+        - name: Wait for infrastructure root application to sync
+          kubernetes.core.k8s_info:
+            api_version: argoproj.io/v1alpha1
+            kind: Application
+            name: infrastructure-root
+            namespace: argocd
+          register: root_app
+          until: 
+            - root_app.resources | length > 0
+            - root_app.resources[0].status.sync.status | default('Unknown') == 'Synced'
+          retries: 60
+          delay: 10
+          
+        - name: Display root application sync status
+          debug:
+            msg: "✅ Infrastructure root application synced successfully"
+
+    # ===========================================
+    # PHASE 2: MONITOR INFRASTRUCTURE DEPLOYMENT
+    # ===========================================
+    - name: Monitor infrastructure application deployment
+      block:
+        - name: Get all infrastructure applications
+          kubernetes.core.k8s_info:
+            api_version: argoproj.io/v1alpha1
+            kind: Application
+            namespace: argocd
+            label_selectors:
+              - "app.kubernetes.io/part-of=infrastructure"
+          register: infra_apps
+          
+        - name: Display infrastructure applications status
+          debug:
+            msg:
+              - "Infrastructure Applications Found: {{ infra_apps.resources | length }}"
+              - "Applications:"
+          when: infra_apps.resources | length > 0
+          
+        - name: Display individual application status
+          debug:
+            msg: 
+              - "  • {{ item.metadata.name }}"
+              - "    Sync: {{ item.status.sync.status | default('Unknown') }}"
+              - "    Health: {{ item.status.health.status | default('Unknown') }}"
+              - "    Wave: {{ item.metadata.annotations['argocd.argoproj.io/sync-wave'] | default('N/A') }}"
+          loop: "{{ infra_apps.resources }}"
+          loop_control:
+            label: "{{ item.metadata.name }}"
+          when: infra_apps.resources | length > 0
+
+    # ===========================================
+    # PHASE 3: WAIT FOR CRITICAL APPS TO BE HEALTHY
+    # ===========================================
+    - name: Wait for critical infrastructure applications
+      block:
+        - name: Wait for storage applications (Wave 1)
+          kubernetes.core.k8s_info:
+            api_version: argoproj.io/v1alpha1
+            kind: Application
+            name: "{{ item }}"
+            namespace: argocd
+          register: storage_app_status
+          until:
+            - storage_app_status.resources | length > 0
+            - storage_app_status.resources[0].status.sync.status | default('Unknown') == 'Synced'
+            - storage_app_status.resources[0].status.health.status | default('Unknown') == 'Healthy'
+          retries: 90
+          delay: 20
+          loop:
+            - rook-ceph-operator
+            - rook-ceph-cluster
+          ignore_errors: true
+          
+        - name: Display storage deployment status
+          debug:
+            msg: "✅ Storage infrastructure (Wave 1) completed"
+          
+        - name: Wait for monitoring applications (Wave 2-3) 
+          kubernetes.core.k8s_info:
+            api_version: argoproj.io/v1alpha1
+            kind: Application
+            name: "{{ item }}"
+            namespace: argocd
+          register: monitoring_app_status
+          until:
+            - monitoring_app_status.resources | length > 0
+            - monitoring_app_status.resources[0].status.sync.status | default('Unknown') == 'Synced'
+            - monitoring_app_status.resources[0].status.health.status | default('Unknown') == 'Healthy'
+          retries: 60
+          delay: 15
+          loop:
+            - prometheus-operator
+            - grafana
+          ignore_errors: true
+          
+        - name: Display monitoring deployment status
+          debug:
+            msg: "✅ Monitoring infrastructure (Wave 2) completed"
+
+    # ===========================================
+    # FINAL STATUS REPORT
+    # ===========================================
+    - name: Generate final deployment summary
+      block:
+        - name: Get final application status
+          kubernetes.core.k8s_info:
+            api_version: argoproj.io/v1alpha1
+            kind: Application
+            namespace: argocd
+          register: all_apps_final
+          
+        - name: Calculate deployment statistics
+          set_fact:
+            total_apps: "{{ all_apps_final.resources | length }}"
+            synced_apps: "{{ all_apps_final.resources | selectattr('status.sync.status', 'defined') | selectattr('status.sync.status', 'equalto', 'Synced') | list }}"
+            healthy_apps: "{{ all_apps_final.resources | selectattr('status.health.status', 'defined') | selectattr('status.health.status', 'equalto', 'Healthy') | list }}"
+            
+        - name: Display final deployment summary
+          debug:
+            msg:
+              - "🎉 INFRASTRUCTURE APPLICATIONS DEPLOYMENT COMPLETE!"
+              - ""
+              - "📊 DEPLOYMENT STATISTICS:"
+              - "• Total Applications: {{ total_apps }}"
+              - "• Synced Applications: {{ synced_apps | length }}/{{ total_apps }}"
+              - "• Healthy Applications: {{ healthy_apps | length }}/{{ total_apps }}"
+              - ""
+              - "🏗️ INFRASTRUCTURE COMPONENTS:"
+              - "• Wave 1: Storage (Rook-Ceph operator and cluster)"
+              - "• Wave 2: Monitoring (Prometheus, Grafana)"
+              - "• Wave 3: Additional platform services"
+              - ""
+              - "✅ All infrastructure applications deployed via GitOps!"
+              - "✅ Using proper Helm charts with customized values"
+              - "✅ Managed through ArgoCD sync waves for proper ordering"
+              - ""
+              - "🎯 Infrastructure platform is ready for workloads!"

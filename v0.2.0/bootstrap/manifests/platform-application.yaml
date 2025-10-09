@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infrastructure-root
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: infrastructure-root
+    app.kubernetes.io/part-of: infrastructure
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  source:
+    repoURL: "https://github.com/ProficientNowTech/pn-infra.git"
+    targetRevision: "main"
+    path: applications/infrastructure
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  info:
+    - name: Description
+      value: "Infrastructure root application - app of apps pattern"
+    - name: Documentation
+      value: "Production-grade infrastructure deployment"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
+  revisionHistoryLimit: 10

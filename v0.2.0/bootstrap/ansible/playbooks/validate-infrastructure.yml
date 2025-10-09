@@ -1,0 +1,68 @@
+---
+# Infrastructure Validation Playbook
+# Validates the health of all critical infrastructure components
+
+- name: Validate Infrastructure Health
+  hosts: kube_control_plane[0]
+  become: false
+  gather_facts: true
+  vars:
+    kubeconfig_path: "{{ ansible_env.HOME }}/.kube/config"
+    
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+    
+  tasks:
+    - name: Verify kubectl connectivity
+      command: kubectl cluster-info
+      register: cluster_info
+      changed_when: false
+      
+    - name: Display cluster information
+      debug:
+        msg: "{{ cluster_info.stdout }}"
+        
+    - name: Check if all required namespaces exist
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Namespace
+        name: "{{ item }}"
+      register: namespace_check
+      failed_when: namespace_check.resources | length == 0
+      loop:
+        - kube-system
+        - ingress-nginx
+        - cert-manager
+        - vault
+        - argocd
+        
+    - name: Run comprehensive infrastructure health checks
+      include_role:
+        name: infrastructure-health-check
+        
+  post_tasks:
+    - name: Display next steps
+      debug:
+        msg:
+          - "🎉 INFRASTRUCTURE VALIDATION COMPLETE!"
+          - ""
+          - "Your production-grade Kubernetes cluster is ready for applications!"
+          - ""
+          - "Infrastructure Components Status:"
+          - "✅ Cilium CNI - Pod networking operational"
+          - "✅ Multus CNI - Multi-networking capability available"
+          - "✅ NGINX Ingress - HTTP/HTTPS traffic routing ready"
+          - "✅ Cert-Manager - TLS certificate automation ready"
+          - "✅ Vault - Secrets management deployed (requires init)"
+          - "✅ ArgoCD - GitOps platform ready for applications"
+          - ""
+          - "Next Steps:"
+          - "1. Initialize Vault if using secrets management"
+          - "2. Configure ArgoCD projects and repositories"
+          - "3. Deploy your applications via GitOps"
+          - ""
+          - "ArgoCD Access:"
+          - "• URL: http://{{ ansible_default_ipv4.address }}:30080 (host: argocd.local)"
+          - "• Add to /etc/hosts: {{ ansible_default_ipv4.address }} argocd.local"
+          - "• Username: admin"
+          - "• Get password: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d"
