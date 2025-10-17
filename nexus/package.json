@@ -31,17 +31,21 @@
     "chalk": "^4.1.2",
     "figlet": "^1.7.0",
     "gradient-string": "^2.0.2",
-    "ink": "^4.4.1",
+    "ink": "^5.0.1",
     "pastel": "^3.0.0",
     "react": "^18.2.0",
     "winston": "^3.11.0",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/figlet": "^1.5.8",
     "@types/jest": "^29.5.8",
     "@types/node": "^20.9.0",
     "@types/react": "^18.2.37",
+    "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
     "eslint": "^8.53.0",
