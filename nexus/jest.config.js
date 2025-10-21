@@ -24,8 +24,7 @@ module.exports = {
       statements: 80
     }
   },
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@/components/(.*)$': '<rootDir>/src/ui/components/$1',
     '^@/layouts/(.*)$': '<rootDir>/src/ui/layouts/$1',
