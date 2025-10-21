@@ -13,7 +13,7 @@ export default {
     }]
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(ink-testing-library)/)'
+    'node_modules/(?!(ink-testing-library|conf)/)'
   ],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
